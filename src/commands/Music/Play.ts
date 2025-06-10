@@ -86,33 +86,80 @@ export default class implements Command {
 
     player.textId = handler.channel!.id
 
-    const result = await player.search(value, { requester: handler.user })
-    const tracks = result.tracks.filter((e) =>
-      typeof maxLength !== 'string' ? e.duration > maxLength : e
-    )
+    try {
+      const result = await player.search(value, { requester: handler.user })
+      const tracks = result.tracks.filter((e) =>
+        typeof maxLength !== 'string' ? e.duration > maxLength : e
+      )
 
-    if (!result.tracks.length)
-      return handler.editReply({
-        embeds: [
-          new EmbedBuilder()
-            .setDescription(`${client.i18n.get(handler.language, 'command.music', 'play_match')}`)
-            .setColor(client.color),
-        ],
+      if (!result.tracks.length)
+        return handler.editReply({
+          embeds: [
+            new EmbedBuilder()
+              .setDescription(
+                `${client.i18n.get(handler.language, 'command.music', 'play_match')}`
+              )
+              .setColor(client.color),
+          ],
+        })
+      if (result.type === 'PLAYLIST') for (let track of tracks) player.queue.add(track)
+      else if (player.playing && result.type === 'SEARCH') player.queue.add(tracks[0])
+      else if (player.playing && result.type !== 'SEARCH')
+        for (let track of tracks) player.queue.add(track)
+      else player.queue.add(tracks[0])
+
+      const TotalDuration = player.queue.duration
+
+      if (handler.message) await handler.message.delete().catch(() => null)
+
+      if (!player.playing) player.play()
+
+      if (result.type === 'TRACK') {
+        const embed = new EmbedBuilder()
+          .setDescription(
+            `${client.i18n.get(handler.language, 'command.music', 'play_track', {
+              title: this.getTitle(client, result.type, tracks),
+              duration: convertTime(tracks[0].duration as number),
+              request: String(tracks[0].requester),
+            })}`
+          )
+          .setColor(client.color)
+
+        handler.editReply({ content: ' ', embeds: [embed] })
+      } else if (result.type === 'PLAYLIST') {
+        const embed = new EmbedBuilder()
+          .setDescription(
+            `${client.i18n.get(handler.language, 'command.music', 'play_playlist', {
+              title: this.getTitle(client, result.type, tracks, value),
+              duration: convertTime(TotalDuration),
+              songs: String(tracks.length),
+              request: String(tracks[0].requester),
+            })}`
+          )
+          .setColor(client.color)
+
+        handler.editReply({ content: ' ', embeds: [embed] })
+      } else if (result.type === 'SEARCH') {
+        const embed = new EmbedBuilder().setColor(client.color).setDescription(
+          `${client.i18n.get(handler.language, 'command.music', 'play_result', {
+            title: this.getTitle(client, result.type, tracks),
+            duration: convertTime(tracks[0].duration as number),
+            request: String(tracks[0].requester),
+          })}`
+        )
+
+        handler.editReply({ content: ' ', embeds: [embed] })
+      }
+    } catch (error) {
+      client.logger.error('PlayCommandError', error)
+      handler.editReply({
+        content:
+          'An error occurred while trying to play the song. Please ensure a Lavalink server is connected and the input is valid.',
       })
-    if (result.type === 'PLAYLIST') for (let track of tracks) player.queue.add(track)
-    else if (player.playing && result.type === 'SEARCH') player.queue.add(tracks[0])
-    else if (player.playing && result.type !== 'SEARCH')
-      for (let track of tracks) player.queue.add(track)
-    else player.queue.add(tracks[0])
+    }
+  }
 
-    const TotalDuration = player.queue.duration
-
-    if (handler.message) await handler.message.delete().catch(() => null)
-
-    if (!player.playing) player.play()
-
-    if (result.type === 'TRACK') {
-      const embed = new EmbedBuilder()
+  checkSameVoice(client: Manager, handler: CommandHandler, language: string) {
         .setDescription(
           `${client.i18n.get(handler.language, 'command.music', 'play_track', {
             title: this.getTitle(client, result.type, tracks),

@@ -135,7 +135,7 @@ export class ConfigDataService {
           },
         },
         AUTOFIX_LAVALINK: {
-          enable: true,
+          enable: false,
           retryCount: 10,
           retryTimeout: 3000,
         },
