@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:18-alpine
 # Create the bot's directory
 RUN mkdir -p /main/bot
 WORKDIR /main/bot
