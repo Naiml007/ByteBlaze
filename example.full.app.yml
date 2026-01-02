@@ -112,7 +112,8 @@ utilities:
     enable: false
     port: 3000
     whitelist: [] # Example: ["lavalink.dev"]
-    auth: 'youshallnotpass'
+    # Set a strong, unique password here to secure the web server.
+    auth: ''
 
   # Because discord-hybrid-sharding not working with this bot
   SHARDING_SYSTEM:

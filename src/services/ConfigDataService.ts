@@ -59,6 +59,10 @@ export class ConfigDataService {
       throw new Error('TOKEN field not in string, please check app.example.yml for example')
     if (!res.player.NODES || res.player.NODES.length == 0)
       throw new Error('Config file not contains NODES, please check app.example.yml for example')
+    if (res.utilities?.WEB_SERVER?.enable && !res.utilities?.WEB_SERVER?.auth)
+      throw new Error(
+        'Web server is enabled but no auth token is set. Please set a secure token in your config file.'
+      )
   }
 
   // Modded from:
@@ -143,7 +147,7 @@ export class ConfigDataService {
           host: '0.0.0.0',
           enable: false,
           port: 2880,
-          auth: 'youshallnotpass',
+          auth: '',
           whitelist: [],
         },
         PREMIUM_LOG_CHANNEL: '',
