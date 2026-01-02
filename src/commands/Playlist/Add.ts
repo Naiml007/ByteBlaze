@@ -218,9 +218,9 @@ export default class implements Command {
   }
 
   // Autocomplete function
-  public async autocomplete(client: Manager, interaction: GlobalInteraction, language: string) {
+  public async autocomplete(client: Manager, interaction: AutocompleteInteraction, language: string) {
     let choice: AutocompleteInteractionChoices[] = []
-    const url = String((interaction as CommandInteraction).options.get('search')!.value)
+    const url = interaction.options.getFocused()
 
     const maxLength = await client.db.maxlength.get(interaction.user.id)
 

@@ -131,9 +131,9 @@ export default class implements Command {
   }
 
   // Autocomplete function
-  async autocomplete(client: Manager, interaction: GlobalInteraction, language: string) {
+  async autocomplete(client: Manager, interaction: AutocompleteInteraction, language: string) {
     let choice: AutocompleteInteractionChoices[] = []
-    const url = String((interaction as CommandInteraction).options.get('search')!.value)
+    const url = interaction.options.getFocused()
 
     const Random =
       client.config.player.AUTOCOMPLETE_SEARCH[
